@@ -1,0 +1,16 @@
+version: "3"
+services:
+  umandaditos-db:
+    container_name: umandaditos_db
+    image: postgres:16.2
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5886:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=umandaditos
+
+volumes: 
+  pgdata:

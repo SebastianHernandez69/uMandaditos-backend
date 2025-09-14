@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model RideStatus {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  rides Ride[]
+}
+
+model PostStatus {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  posts Post[]
+}
+
+model Media {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  link   String
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  users User[]
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(50)
+  email        String    @unique @db.VarChar(50)
+  dni          String?   @db.VarChar(15)
+  birthDate    DateTime?
+  phone        String?   @db.VarChar(12)
+  profilePicId Int?
+
+  // Relationships
+  profilePic      Media?   @relation(fields: [profilePicId], references: [id], onDelete: SetNull)
+  posts           Post[]
+  offers          Offer[]
+  ratingsGiven    Rating[] @relation("RatingsGiven")
+  ratingsReceived Rating[] @relation("RatingsReceived")
+
+  @@index([email])
+  @@index([dni])
+  @@index([phone])
+}
+
+model Location {
+  id      Int     @id @default(autoincrement())
+  name    String  @db.VarChar(50)
+  lat     Float
+  lon     Float
+  isInMap Boolean @default(false)
+  prefix  String  @db.VarChar(50)
+
+  // Relationships
+  pickupPosts   Post[] @relation("PickupPosts")
+  deliveryPosts Post[] @relation("DeliveryPosts")
+}
+
+model Post {
+  id             Int    @id @default(autoincrement())
+  title          String @db.VarChar(50)
+  description    String
+  suggestedValue Float
+
+  pickupLocationId   Int
+  deliveryLocationId Int
+  posterUserId       Int
+  postStatusId       Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  pickupLocation   Location   @relation("PickupPosts", fields: [pickupLocationId], references: [id])
+  deliveryLocation Location   @relation("DeliveryPosts", fields: [deliveryLocationId], references: [id])
+  posterUser       User       @relation(fields: [posterUserId], references: [id])
+  postStatus       PostStatus @relation(fields: [postStatusId], references: [id])
+
+  offers Offer[]
+  rides  Ride[]
+
+  @@index([posterUserId])
+  @@index([postStatusId])
+  @@index([pickupLocationId])
+  @@index([deliveryLocationId])
+
+}
+
+model Offer {
+  id                 Int     @id @default(autoincrement())
+  postId             Int
+  userId             Int
+  isCounterOffer     Boolean @default(false)
+  counterOfferAmount Float
+  accepted           Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  rides Ride[]
+}
+
+model Ride {
+  id           Int       @id @default(autoincrement())
+  securityCode String
+  acceptedAt   DateTime  @default(now())
+  deliveryAt   DateTime?
+  acceptedRate Float
+
+  postId       Int
+  offerId      Int
+  statusRideId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  post       Post       @relation(fields: [postId], references: [id])
+  offer      Offer      @relation(fields: [offerId], references: [id])
+  statusRide RideStatus @relation(fields: [statusRideId], references: [id])
+
+  ratings Rating[]
+}
+
+model Rating {
+  id          Int     @id @default(autoincrement())
+  rideId      Int
+  raterUserId Int
+  ratedUserId Int
+  stars       Float
+  review      String?
+  active      Boolean @default(true)
+  isPoster    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  ride      Ride @relation(fields: [rideId], references: [id])
+  raterUser User @relation("RatingsGiven", fields: [raterUserId], references: [id])
+  ratedUser User @relation("RatingsReceived", fields: [ratedUserId], references: [id])
+}
