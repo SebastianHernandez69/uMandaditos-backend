@@ -14,7 +14,7 @@ export class RideController {
   @Get('/:id')
   async getRideById(@Param('id') id: number): Promise<ResponseDto<RideResponseDto>> {
     return {
-      data: await this.rideService.getRideById(id),
+      data: await this.rideService.getRideById(+id),
       message: 'Ride found successfully',
       success: true
     };
@@ -23,7 +23,7 @@ export class RideController {
   @Get('/history/:userId')
   async getHistory(@Param('userId') userId: number): Promise<ResponseDto<RideHistoryDto[]>> {
     return {
-      data: await this.rideService.getHistory(userId),
+      data: await this.rideService.getHistory(+userId),
       message: 'History found successfully',
       success: true
     };
@@ -41,7 +41,7 @@ export class RideController {
   @Get('/deliveries-count/:userId')
   async getDeliveriesCount(@Param('userId') userId: number): Promise<ResponseDto<number>> {
     return {
-      data: await this.rideService.getDeliveriesCount(userId),
+      data: await this.rideService.getDeliveriesCount(+userId),
       message: 'Deliveries count found successfully',
       success: true
     };
@@ -50,7 +50,7 @@ export class RideController {
   @Get('/active-rides/:userId')
   async getActiveRidesByRunner(@Param('userId') userId: number): Promise<ResponseDto<RideMinResponseDto[]>> {
     return {
-      data: await this.rideService.getActiveRidesByRunner(userId),
+      data: await this.rideService.getActiveRidesByRunner(+userId),
       message: 'Active rides found successfully',
       success: true
     };
@@ -59,7 +59,7 @@ export class RideController {
   @Get('/post/:postId')
   async getRideByPostId(@Param('postId') postId: number): Promise<ResponseDto<RideRunnerResponseDto>> {
     return {
-      data: await this.rideService.getRideByPostId(postId),
+      data: await this.rideService.getRideByPostId(+postId),
       message: 'Ride found successfully',
       success: true
     };
