@@ -4,6 +4,7 @@ import { CreateOfferDto } from './dto/create-offer.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { Body } from '@nestjs/common';
 import { OfferResponseDto } from './dto/offer-response.dto';
+import { UpdateOfferStateDto } from './dto/update-offer-state.dto';
 
 @Controller('offer')
 export class OfferController {
@@ -38,7 +39,7 @@ export class OfferController {
   }
 
   @Patch(':id')
-  async updateOfferState(@Param('id') id: number, @Body() data: { state: boolean }): Promise<ResponseDto<OfferResponseDto>> {
+  async updateOfferState(@Param('id') id: number, @Body() data: UpdateOfferStateDto): Promise<ResponseDto<OfferResponseDto>> {
     return {
       data: await this.offerService.updateOfferState(id, data.state),
       message: 'Offer state updated successfully',
