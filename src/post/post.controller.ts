@@ -11,7 +11,7 @@ export class PostController {
   @Get(':id')
   async getPostById(@Param('id') id: number): Promise<ResponseDto<PostResponseDto>> {
     return {
-        data: await this.postService.getPostById(id),
+        data: await this.postService.getPostById(+id),
         message: 'Post found successfully',
         success: true
     };
@@ -20,7 +20,7 @@ export class PostController {
   @Get('user/:userId')
   async getAllPostsByUserId(@Param('userId') userId: number): Promise<ResponseDto<PostResponseDto[]>> {
     return {
-        data: await this.postService.getAllPostsByUserId(userId),
+        data: await this.postService.getAllPostsByUserId(+userId),
         message: 'Posts found successfully',
         success: true
     };
@@ -39,7 +39,7 @@ export class PostController {
   @Get('near/:locationId')
   async getAllPostsNear(@Param('locationId') locationId: number): Promise<ResponseDto<PostResponseDto[]>> {
     return {
-        data: await this.postService.getAllPostsNear(locationId),
+        data: await this.postService.getAllPostsNear(+locationId),
         message: 'Posts found successfully',
         success: true
     };
@@ -48,7 +48,7 @@ export class PostController {
   @Get('location/:locationId')
   async getPostsByLocationId(@Param('locationId') locationId: number): Promise<ResponseDto<PostResponseDto[]>> {
     return {
-        data: await this.postService.getPostsByLocationId(locationId),
+        data: await this.postService.getPostsByLocationId(+locationId),
         message: 'Posts found successfully',
         success: true
     };
@@ -57,7 +57,7 @@ export class PostController {
   @Get('count/:userId')
   async getPostCount(@Param('userId') userId: number): Promise<ResponseDto<number>> {
     return {
-        data: await this.postService.getPostCount(userId),
+        data: await this.postService.getPostCount(+userId),
         message: 'Post count found successfully',
         success: true
     };
@@ -66,7 +66,7 @@ export class PostController {
   @Get('active/:userId')
   async getActivePostsByUserId(@Param('userId') userId: number): Promise<ResponseDto<PostResponseDto[]>> {
     return {
-        data: await this.postService.getActivePostsByUserId(userId),
+        data: await this.postService.getActivePostsByUserId(+userId),
         message: 'Active posts found successfully',
         success: true
     };
@@ -74,11 +74,11 @@ export class PostController {
 
   @Patch('incourse/:postId')
   async markPostAsIncourse(@Param('postId') postId: number): Promise<void> {
-    await this.postService.markPostAsIncourse(postId);
+    await this.postService.markPostAsIncourse(+postId);
   }
 
   @Patch('finished/:postId')
   async markPostAsFinished(@Param('postId') postId: number): Promise<void> {
-    await this.postService.markPostAsFinished(postId);
+    await this.postService.markPostAsFinished(+postId);
   }
 }

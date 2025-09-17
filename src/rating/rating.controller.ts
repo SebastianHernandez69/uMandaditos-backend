@@ -20,7 +20,7 @@ export class RatingController {
   @Get(':id')
   async getRatingById(@Param('id') id: number): Promise<ResponseDto<Rating>> {
     return {
-      data: await this.ratingService.getRatingById(id),
+      data: await this.ratingService.getRatingById(+id),
       message: 'Rating retrieved successfully',
       success: true
     };
@@ -29,7 +29,7 @@ export class RatingController {
   @Get('rated-user/:ratedUserId')
   async getRatingByRatedUserId(@Param('ratedUserId') ratedUserId: number): Promise<ResponseDto<Rating[]>> {
     return {
-      data: await this.ratingService.getRatingByRatedUserId(ratedUserId),
+      data: await this.ratingService.getRatingByRatedUserId(+ratedUserId),
       message: 'Ratings retrieved successfully',
       success: true
     };
@@ -38,7 +38,7 @@ export class RatingController {
   @Patch(':id')
   async updateRating(@Param('id') id: number, @Body() updateRatingDto: CreateRatingDto): Promise<ResponseDto<Rating>> {
     return {
-      data: await this.ratingService.updateRating(id, updateRatingDto),
+      data: await this.ratingService.updateRating(+id, updateRatingDto),
       message: 'Rating updated successfully',
       success: true
     };
@@ -47,7 +47,7 @@ export class RatingController {
   @Delete(':id')
   async deleteRating(@Param('id') id: number): Promise<ResponseDto<Rating>> {
     return {
-      data: await this.ratingService.deleteRating(id),
+      data: await this.ratingService.deleteRating(+id),
       message: 'Rating deleted successfully',
       success: true
     };
