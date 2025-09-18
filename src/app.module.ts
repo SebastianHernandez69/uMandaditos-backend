@@ -9,9 +9,11 @@ import { OfferModule } from './offer/offer.module';
 import { RideModule } from './ride/ride.module';
 import { RatingModule } from './rating/rating.module';
 import { SecurityCodeModule } from './utilities/security-code/security-code.module';
+import { AuthModule } from './auth/auth.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
-  imports: [PrismaModule, PostModule, LocationModule, UserModule, OfferModule, RideModule, RatingModule, SecurityCodeModule],
+  imports: [PrismaModule, PostModule, LocationModule, UserModule, OfferModule, RideModule, RatingModule, SecurityCodeModule, AuthModule, FirebaseModule],
   controllers: [AppController],
   providers: [AppService],
 })
