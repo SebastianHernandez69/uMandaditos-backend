@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { RideService } from './ride.service';
 import { RideResponseDto } from './dto/ride-response.dto';
 import { RideHistoryDto } from './dto/ride-history.dto';
@@ -6,11 +6,14 @@ import { ResponseDto } from 'src/common/dto/response.dto';
 import { CreateRideDto } from './dto/create-ride.dto';
 import { RideMinResponseDto } from './dto/ride-min-response.dto';
 import { RideRunnerResponseDto } from './dto/ride-runner-response.dto';
+import { AuthenticatedRequest } from 'src/common/types/authenticated-request';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('ride')
 export class RideController {
   constructor(private readonly rideService: RideService) {}
 
+  @Public()
   @Get('/:id')
   async getRideById(@Param('id') id: number): Promise<ResponseDto<RideResponseDto>> {
     return {
@@ -20,15 +23,16 @@ export class RideController {
     };
   }
 
-  @Get('/history/:userId')
-  async getHistory(@Param('userId') userId: number): Promise<ResponseDto<RideHistoryDto[]>> {
+  @Get('/history')
+  async getHistory(@Req() req: AuthenticatedRequest): Promise<ResponseDto<RideHistoryDto[]>> {
     return {
-      data: await this.rideService.getHistory(+userId),
+      data: await this.rideService.getHistory(req.user.uid),
       message: 'History found successfully',
       success: true
     };
   }
 
+  @Public()
   @Post('/create')
   async createRide(@Body() createRideDto: CreateRideDto): Promise<ResponseDto<RideMinResponseDto>> {
     return {
@@ -38,24 +42,25 @@ export class RideController {
     }
   }
 
-  @Get('/deliveries-count/:userId')
-  async getDeliveriesCount(@Param('userId') userId: number): Promise<ResponseDto<number>> {
+  @Get('/deliveries-count')
+  async getDeliveriesCount(@Req() req: AuthenticatedRequest): Promise<ResponseDto<number>> {
     return {
-      data: await this.rideService.getDeliveriesCount(+userId),
+      data: await this.rideService.getDeliveriesCount(req.user.uid),
       message: 'Deliveries count found successfully',
       success: true
     };
   }
 
-  @Get('/active-rides/:userId')
-  async getActiveRidesByRunner(@Param('userId') userId: number): Promise<ResponseDto<RideMinResponseDto[]>> {
+  @Get('/active-rides')
+  async getActiveRidesByRunner(@Req() req: AuthenticatedRequest): Promise<ResponseDto<RideMinResponseDto[]>> {
     return {
-      data: await this.rideService.getActiveRidesByRunner(+userId),
+      data: await this.rideService.getActiveRidesByRunner(req.user.uid),
       message: 'Active rides found successfully',
       success: true
     };
   }
 
+  @Public()
   @Get('/post/:postId')
   async getRideByPostId(@Param('postId') postId: number): Promise<ResponseDto<RideRunnerResponseDto>> {
     return {

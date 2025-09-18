@@ -3,11 +3,14 @@ import { PostService } from './post.service';
 import { PostResponseDto } from './dto/post-response.dto';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import { CreatePostDto } from './dto/create-post.dto';
+import { AuthenticatedRequest } from 'src/common/types/authenticated-request';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
-
+  
+  @Public()
   @Get(':id')
   async getPostById(@Param('id') id: number): Promise<ResponseDto<PostResponseDto>> {
     return {
@@ -17,25 +20,25 @@ export class PostController {
     };
   }
 
-  @Get('user/:userId')
-  async getAllPostsByUserId(@Param('userId') userId: number): Promise<ResponseDto<PostResponseDto[]>> {
+  @Get('user')
+  async getAllPostsByUserId(@Req() req: AuthenticatedRequest): Promise<ResponseDto<PostResponseDto[]>> {
     return {
-        data: await this.postService.getAllPostsByUserId(+userId),
+        data: await this.postService.getAllPostsByUserId(req.user.uid),
         message: 'Posts found successfully',
         success: true
     };
   }
 
   @Post()
-  async createPost(@Body() data: CreatePostDto, @Req() req: Request): Promise<ResponseDto<PostResponseDto>> {
-    const userId = 1; // TODO: get user id from token
+  async createPost(@Body() data: CreatePostDto, @Req() req: AuthenticatedRequest): Promise<ResponseDto<PostResponseDto>> {
     return {
-        data: await this.postService.createPost(data, userId),
+        data: await this.postService.createPost(data, req.user.uid),
         message: 'Post created successfully',
         success: true
     };
   }
 
+  @Public()
   @Get('near/:locationId')
   async getAllPostsNear(@Param('locationId') locationId: number): Promise<ResponseDto<PostResponseDto[]>> {
     return {
@@ -45,6 +48,7 @@ export class PostController {
     };
   }
 
+  @Public()
   @Get('location/:locationId')
   async getPostsByLocationId(@Param('locationId') locationId: number): Promise<ResponseDto<PostResponseDto[]>> {
     return {
@@ -54,29 +58,31 @@ export class PostController {
     };
   }
 
-  @Get('count/:userId')
-  async getPostCount(@Param('userId') userId: number): Promise<ResponseDto<number>> {
+  @Get('count')
+  async getPostCount(@Req() req: AuthenticatedRequest): Promise<ResponseDto<number>> {
     return {
-        data: await this.postService.getPostCount(+userId),
+        data: await this.postService.getPostCount(req.user.uid),
         message: 'Post count found successfully',
         success: true
     };
   }
 
-  @Get('active/:userId')
-  async getActivePostsByUserId(@Param('userId') userId: number): Promise<ResponseDto<PostResponseDto[]>> {
+  @Get('active')
+  async getActivePostsByUserId(@Req() req: AuthenticatedRequest): Promise<ResponseDto<PostResponseDto[]>> {
     return {
-        data: await this.postService.getActivePostsByUserId(+userId),
+        data: await this.postService.getActivePostsByUserId(req.user.uid),
         message: 'Active posts found successfully',
         success: true
     };
   }
 
+  @Public()
   @Patch('incourse/:postId')
   async markPostAsIncourse(@Param('postId') postId: number): Promise<void> {
     await this.postService.markPostAsIncourse(+postId);
   }
 
+  @Public()
   @Patch('finished/:postId')
   async markPostAsFinished(@Param('postId') postId: number): Promise<void> {
     await this.postService.markPostAsFinished(+postId);

@@ -41,9 +41,9 @@ export class RideService {
         };
     }
 
-    async getHistory(userId: number): Promise<RideHistoryDto[]> {
+    async getHistory(uid: string): Promise<RideHistoryDto[]> {
         
-        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        const user = await this.prisma.user.findUnique({ where: { uid } });
         
         if (!user) {
             throw new NotFoundException('User not found');
@@ -51,7 +51,7 @@ export class RideService {
 
         const rides = await this.prisma.ride.findMany({
             where: { 
-                offer: { userId },
+                offer: { userId: user.id },
             },
             orderBy: { createdAt: 'desc' },
             include: { post: { include: { pickupLocation: true, deliveryLocation: true } }, offer: true }
@@ -94,10 +94,16 @@ export class RideService {
         };
     }
 
-    async getDeliveriesCount(userId: number): Promise<number> {
+    async getDeliveriesCount(uid: string): Promise<number> {
+        const user = await this.prisma.user.findUnique({ where: { uid } });
+        
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        
         const count = await this.prisma.ride.count({ 
             where: { 
-                offer: { userId },
+                offer: { userId: user.id },
                 statusRide: { id: 3 }
             } 
         });
@@ -109,10 +115,16 @@ export class RideService {
         return count;
     }
 
-    async getActiveRidesByRunner(userId: number): Promise<RideMinResponseDto[]> {
+    async getActiveRidesByRunner(uid: string): Promise<RideMinResponseDto[]> {
+        const user = await this.prisma.user.findUnique({ where: { uid } });
+        
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        
         const rides = await this.prisma.ride.findMany({
             where: { 
-                offer: { userId, accepted: true },
+                offer: { userId: user.id, accepted: true },
                 statusRide: { id: 1 }
             },
             include: { post: true, offer: true }

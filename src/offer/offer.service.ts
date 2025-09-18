@@ -12,7 +12,13 @@ export class OfferService {
         private readonly postService: PostService
     ) {}
 
-    async createOffer(data: CreateOfferDto): Promise<OfferResponseDto>{
+    async createOffer(data: CreateOfferDto, uid: string): Promise<OfferResponseDto>{
+        const user = await this.prisma.user.findUnique({ where: { uid }, select: { id: true } });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
         const post = await this.postService.getPostById(data.postId);
         
         if (!post) {
@@ -21,7 +27,10 @@ export class OfferService {
 
         const offer = await this.prisma.offer.create(
             {
-                data,
+                data: {
+                    ...data,
+                    userId: user.id
+                },
                 include: {
                     post: true,
                     user: true
@@ -78,9 +87,15 @@ export class OfferService {
         return offer;
     }
 
-    async getUserOffersAcceptedCount(userId: number): Promise<number> {
+    async getUserOffersAcceptedCount(uid: string): Promise<number> {
+        const user = await this.prisma.user.findUnique({ where: { uid }, select: { id: true } });
+        
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        
         const offers = await this.prisma.offer.count({
-            where: { userId, accepted: true }
+            where: { userId: user.id, accepted: true }
         });
         return offers;
     }
@@ -101,9 +116,15 @@ export class OfferService {
         return !deletedOffer;
     }
 
-    async getOffersAcceptedByUserId(userId: number): Promise<OfferResponseDto[]> {
+    async getOffersAcceptedByUserId(uid: string): Promise<OfferResponseDto[]> {
+        const user = await this.prisma.user.findUnique({ where: { uid }, select: { id: true } });
+        
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        
         const offers = await this.prisma.offer.findMany({
-            where: { userId, accepted: true },
+            where: { userId: user.id, accepted: true },
             include: { post: true, user: true }
         });
         return offers;

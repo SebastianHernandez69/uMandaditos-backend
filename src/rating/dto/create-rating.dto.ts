@@ -10,16 +10,6 @@ export class CreateRatingDto {
 
     @ApiProperty()
     @IsNumber()
-    @IsNotEmpty()
-    ratedUserId: number;
-
-    @ApiProperty()
-    @IsNumber()
-    @IsNotEmpty()
-    raterUserId: number;
-
-    @ApiProperty()
-    @IsNumber()
     @Min(1)
     @Max(5)
     stars: number;

@@ -10,9 +10,9 @@ export class UserService {
 
     // TODO: create user
 
-    async getUserById(userId: number): Promise<UserResponseDto> {
+    async getUserById(uid: string): Promise<UserResponseDto> {
         const user = await this.prisma.user.findUnique(
-            { where: { id: userId }, 
+            { where: { uid }, 
             include: {profilePic: {select: {link: true}}} 
         });
 
@@ -30,9 +30,9 @@ export class UserService {
         };
     }
 
-    async getUserPrivateProfile(userId: number): Promise<UserPrivateResponseDto>{
+    async getUserPrivateProfile(uid: string): Promise<UserPrivateResponseDto>{
         const user = await this.prisma.user.findUnique({ 
-            where: { id: userId },
+            where: { uid },
             include: {
                 profilePic: {select: {link: true}},   
                 _count: {

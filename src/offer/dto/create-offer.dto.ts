@@ -9,11 +9,6 @@ export class CreateOfferDto {
     postId: number;
 
     @ApiProperty()
-    @IsNumber()
-    @IsNotEmpty()
-    userId: number;
-
-    @ApiProperty()
     @IsBoolean()
     isCounterOffer: boolean;
 

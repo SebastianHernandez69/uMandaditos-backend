@@ -1,12 +1,27 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { FirebaseService } from 'src/firebase/firebase.service';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate{
-    constructor(private readonly firebaseService: FirebaseService){}
+    constructor(
+        private readonly firebaseService: FirebaseService,
+        private readonly reflector: Reflector
+    ){}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        // Validate if the route is public
+        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass()
+        ]);
+
+        if(isPublic){
+            return true;
+        }
+
+        // if the route is not public, validate the token
         const req = context.switchToHttp().getRequest();
         const authHeader = req.headers.authorization;
         

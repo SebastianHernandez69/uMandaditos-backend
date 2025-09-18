@@ -9,14 +9,13 @@ import { LocationService } from 'src/location/location.service';
 export class PostService {
     constructor(
         private readonly prismaService: PrismaService,
-        private readonly userService: UserService,
         private readonly locationService: LocationService
     ){}
 
-    async createPost(createPostDto: CreatePostDto, userId: number): Promise<PostResponseDto> {
+    async createPost(createPostDto: CreatePostDto, uid: string): Promise<PostResponseDto> {
         const {title, description, suggestedValue, pickupLocationId, deliveryLocationId, postStatusId = 1} = createPostDto;
     
-        const posterUser = await this.userService.getUserById(userId);
+        const posterUser = await this.prismaService.user.findUnique({ where: { uid } });
         const pickupLocation = await this.locationService.getLocationById(pickupLocationId);
         const deliveryLocation = await this.locationService.getLocationById(deliveryLocationId);
         
@@ -38,7 +37,7 @@ export class PostService {
                 pickupLocationId,
                 deliveryLocationId,
                 postStatusId,
-                posterUserId: userId
+                posterUserId: posterUser.id
             },
             include: {
                 pickupLocation: true,
@@ -87,9 +86,19 @@ export class PostService {
         };
     }
 
-    async getAllPostsByUserId(userId: number): Promise<PostResponseDto[]> {
+    async getAllPostsByUserId(uid: string): Promise<PostResponseDto[]> {
+
+        const user = await this.prismaService.user.findUnique({ 
+            where: { uid },
+            select: { id: true }
+        });
+        
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
         const posts = await this.prismaService.post.findMany({ 
-            where: { posterUserId: userId },
+            where: { posterUserId: user.id },
             include: {
                 pickupLocation: true,
                 deliveryLocation: true,
@@ -97,10 +106,6 @@ export class PostService {
                 postStatus: true
             }
         });
-        
-        if (!posts) {
-            throw new NotFoundException('Posts not found');
-        }
 
         return posts.map(post => ({
             id: post.id,
@@ -168,8 +173,14 @@ export class PostService {
         }));
     }
     
-    async getPostCount(userId: number): Promise<number> {
-        return await this.prismaService.post.count({ where: { posterUserId: userId } });
+    async getPostCount(uid: string): Promise<number> {
+        const user = await this.prismaService.user.findUnique({ where: { uid }, select: { id: true } });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return await this.prismaService.post.count({ where: { posterUserId: user.id } });
     }
 
     async markPostAsIncourse(postId: number): Promise<void> {
@@ -181,10 +192,17 @@ export class PostService {
         return;
     }
 
-    async getActivePostsByUserId(userId: number): Promise<PostResponseDto[]> {
+    async getActivePostsByUserId(uid: string): Promise<PostResponseDto[]> {
+
+        const user = await this.prismaService.user.findUnique({ where: { uid }, select: { id: true } });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
         const post = await this.prismaService.post.findMany({ 
             where: { 
-                posterUserId: userId, 
+                posterUserId: user.id, 
                 postStatusId: 1,
             },
             include: {

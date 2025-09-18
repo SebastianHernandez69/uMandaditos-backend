@@ -6,12 +6,59 @@ import { CreateRatingDto } from './dto/create-rating.dto';
 export class RatingService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    async createRating(createRatingDto: CreateRatingDto){
-        return this.prismaService.rating.create({ data: createRatingDto });
+    async createRating(createRatingDto: CreateRatingDto, uid: string){
+
+        const { rideId, isPoster } = createRatingDto;
+
+        let ratedUserId: number;
+
+        if(isPoster){
+            const ride = await this.prismaService.ride.findUnique({
+                where: {id: rideId},
+                include: {offer: {select: {userId: true}}}
+            })
+
+            if(!ride){
+                throw new NotFoundException('Ride not found');
+            }
+
+            ratedUserId = ride.offer.userId;
+        } else {
+            const ride = await this.prismaService.ride.findUnique({
+                where: {id: rideId},
+                include: {post: {select: {posterUser: true}}}
+            })
+
+            if(!ride){
+                throw new NotFoundException('Ride not found');
+            }
+
+            ratedUserId = ride.post.posterUser.id;
+        }
+            
+        const user = await this.prismaService.user.findUnique({ where: { uid }, select: { id: true } });
+
+        if(!user){
+            throw new NotFoundException('User not found');
+        }
+
+        return this.prismaService.rating.create({ 
+            data: { 
+                ...createRatingDto, 
+                ratedUserId,
+                raterUserId: user.id
+            } 
+        });
     }
 
-    async getRatingByRatedUserId(ratedUserId: number){
-        return this.prismaService.rating.findMany({ where: { ratedUserId} });
+    async getRatingByRatedUserId(uid: string){
+        const user = await this.prismaService.user.findUnique({ where: { uid}, select: { id: true } });
+
+        if(!user){
+            throw new NotFoundException('User not found');
+        }
+
+        return this.prismaService.rating.findMany({ where: { ratedUserId: user.id } });
     }
 
     async getRatingById(id: number){
