@@ -3,13 +3,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { PostService } from 'src/post/post.service';
 import { OfferResponseDto } from './dto/offer-response.dto';
+import { OfferGateway } from './offer.gateway';
 
 @Injectable()
 export class OfferService {
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly postService: PostService
+        private readonly postService: PostService,
+        private readonly gateway: OfferGateway
     ) {}
 
     async createOffer(data: CreateOfferDto, uid: string): Promise<OfferResponseDto>{
@@ -128,5 +130,41 @@ export class OfferService {
             include: { post: true, user: true }
         });
         return offers;
+    }
+
+    async acceptOffer(offerId: number){
+        const offer = await this.getOfferById(offerId);
+        
+        if (!offer) {
+            throw new NotFoundException('Offer not found');
+        }
+        
+        const posterId = offer.post.posterUserId;
+
+        await this.prisma.offer.update(
+            {
+                where: { id: offerId },
+                data: { accepted: true }
+            }
+        );
+
+        await this.prisma.post.update(
+            {
+                where: { id: offer.post.id },
+                data: { postStatusId: 2 }
+            }
+        );
+
+        this.gateway.emitToUser(posterId.toString(), 'offer:accepted', { 
+            offerId,
+            at: Date.now()
+        });
+
+        this.gateway.emitToUser(offer.user.id.toString(), 'offer:accepted:runner', { 
+            offerId,
+            at: Date.now()
+        });
+
+        return offer;
     }
 }

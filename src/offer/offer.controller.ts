@@ -79,4 +79,14 @@ export class OfferController {
         success: true
     };
   }
+
+  @Public()
+  @Patch('accept/:offerId')
+  async acceptOffer(@Param('offerId') offerId: number): Promise<ResponseDto<OfferResponseDto>> {
+    return {
+      data: await this.offerService.acceptOffer(+offerId),
+      message: 'Offer accepted successfully',
+      success: true
+    };
+  }
 }
