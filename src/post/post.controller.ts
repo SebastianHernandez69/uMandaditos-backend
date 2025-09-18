@@ -11,7 +11,7 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
   
   @Public()
-  @Get(':id')
+  @Get('id/:id')
   async getPostById(@Param('id') id: number): Promise<ResponseDto<PostResponseDto>> {
     return {
         data: await this.postService.getPostById(+id),
