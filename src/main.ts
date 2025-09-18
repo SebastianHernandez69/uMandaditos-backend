@@ -25,6 +25,17 @@ async function bootstrap() {
     .setTitle('Umandaditos API')
     .setDescription('THE API FOR UMANDADITOS')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter the firebase token',
+        in: 'header',
+      },
+      'Firebase-auth',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

@@ -1,15 +1,19 @@
-import { IsDate, IsOptional, IsString } from "class-validator";
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsDateString, IsOptional, IsString } from "class-validator";
 
 export class RegisterUserExtraDataDto {
     
+    @ApiPropertyOptional()
     @IsString()
     @IsOptional()
     dni?: string;
     
-    @IsDate()
+    @ApiPropertyOptional({ type: String, format: 'date-time' })
+    @IsDateString()
     @IsOptional()
-    birthDate?: Date;
+    birthDate?: string;
     
+    @ApiPropertyOptional()
     @IsString()
     @IsOptional()
     phone?: string;    
